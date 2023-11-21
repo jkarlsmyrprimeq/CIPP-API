@@ -1,9 +1,162 @@
 {
-  "name": "CIPP SecureScores v1.0 - Table view",
   "style": "Table",
   "Fields": [
     {
-      "name": "CurrentSecureScore",
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "Unified Audit Log",
+          "value": "UnifiedAuditLog",
+          "formatter": "bool"
+        }
+      ],
+      "name": "UnifiedAuditLog",
+      "API": "Exchange",
+      "Command": "Get-AdminAuditLogConfig",
+      "ExtractFields": [
+        "UnifiedAuditLogIngestionEnabled"
+      ],
+      "StoreAs": "bool"
+    },
+    {
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "MFA Registration Campaign Enabled",
+          "value": "MFANudgeState",
+          "formatter": "bool"
+        }
+      ],
+      "name": "MFANudgeState",
+      "API": "Graph",
+      "URL": "https://graph.microsoft.com/beta/policies/authenticationMethodsPolicy",
+      "ExtractFields": [
+        "registrationEnforcement"
+      ],
+      "StoreAs": "bool",
+      "where": "$_.registrationEnforcement.authenticationMethodsRegistrationCampaign.state -eq 'Enabled'"
+    },
+    {
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "Temporary Access Pass Enabled",
+          "value": "TAPEnabled",
+          "formatter": "bool"
+        }
+      ],
+      "name": "TAPEnabled",
+      "API": "Graph",
+      "URL": "https://graph.microsoft.com/beta/policies/authenticationmethodspolicy/authenticationMethodConfigurations/TemporaryAccessPass",
+      "ExtractFields": [
+        "State"
+      ],
+      "StoreAs": "bool"
+    },
+    {
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "Secure Defaults State Enabled",
+          "value": "SecureDefaultState",
+          "formatter": "warnBool"
+        }
+      ],
+      "name": "SecureDefaultState",
+      "API": "Graph",
+      "URL": "https://graph.microsoft.com/beta/policies/identitySecurityDefaultsEnforcementPolicy",
+      "ExtractFields": [
+        "IsEnabled"
+      ],
+      "StoreAs": "bool"
+    },
+    {
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "Anonymous Privacy Reports",
+          "value": "AnonymousPrivacyReports",
+          "formatter": "reverseBool"
+        }
+      ],
+      "name": "AnonymousPrivacyReports",
+      "API": "Graph",
+      "URL": "https://graph.microsoft.com/beta/admin/reportSettings",
+      "ExtractFields": [
+        "displayConcealedNames"
+      ],
+      "StoreAs": "bool",
+      "where": "$_.displayConcealedNames -eq $false"
+    },
+    {
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "Message Copy for Sent-As Disabled",
+          "formatter": "table",
+          "value": "MessageCopyforSentAsDisabled"
+        }
+      ],
+      "name": "MessageCopyforSentAsDisabled",
+      "API": "Exchange",
+      "Command": "Get-Mailbox",
+      "Parameters": {
+        "RecipientTypeDetails": [
+          "SharedMailbox",
+          "UserMailbox"
+        ]
+      },
+      "where": "$_.MessageCopyForSentAsEnabled -eq $false",
+      "ExtractFields": [
+        "userprincipalname",
+        "messageCopyForSentAsEnabled"
+      ],
+      "StoreAs": "JSON"
+    },
+    {
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "Shared Mailboxes with enabled users",
+          "formatter": "table",
+          "value": "SharedMailboxeswithenabledusers"
+        }
+      ],
+      "name": "SharedMailboxeswithenabledusers",
+      "API": "Exchange",
+      "Command": "Get-Mailbox",
+      "Parameters": {
+        "RecipientTypeDetails": "SharedMailbox"
+      },
+      "where": "$_.accountDisabled -eq $false",
+      "ExtractFields": [
+        "userprincipalname",
+        "accountDisabled"
+      ],
+      "StoreAs": "JSON"
+    },
+    {
+      "UseExistingInfo": false,
+      "FrontendFields": [
+        {
+          "name": "Unused licenses",
+          "formatter": "table",
+          "value": "Unusedlicenses"
+        }
+      ],
+      "name": "Unusedlicenses",
+      "API": "CIPPFunction",
+      "Command": "Get-CIPPLicenseOverview",
+      "ExtractFields": [
+        "License",
+        "TotalLicenses",
+        "availableUnits",
+        "CountUsed"
+      ],
+      "StoreAs": "JSON",
+      "where": "$_.availableUnits -gt 0"
+    },
+    {
       "UseExistingInfo": false,
       "FrontendFields": [
         {
@@ -23,14 +176,19 @@
           "value": "CurrentSecureScore.averageComparativeScores[1].averageScore"
         }
       ],
-      "StoreAs": "JSON",
+      "name": "CurrentSecureScore",
       "API": "Graph",
+      "URL": "https://graph.microsoft.com/beta/security/secureScores?$top=1",
+      "Parameters": {
+        "Nopagination": true
+      },
       "ExtractFields": [
         "currentScore",
         "maxScore",
         "averageComparativeScores"
       ],
-      "URL": "https://graph.microsoft.com/beta/security/secureScores?$top=1"
+      "StoreAs": "JSON"
     }
-  ]
+  ],
+  "name": "CIPP Best Practices v1.0 - Table view"
 }
