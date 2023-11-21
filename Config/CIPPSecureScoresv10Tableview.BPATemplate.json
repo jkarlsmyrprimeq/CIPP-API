@@ -3,26 +3,6 @@
   "style": "Table",
   "Fields": [
     {
-      "name": "SecureDefaultState",
-      "UseExistingInfo": false,
-      "FrontendFields": [
-        {
-          "name": "Secure Defaults State Enabled",
-          "value": "SecureDefaultState",
-          "formatter": "warnBool"
-        }
-      ],
-      "StoreAs": "bool",
-      "API": "Graph",
-      "ExtractFields": [
-        "IsEnabled"
-      ],
-      "parameters": {
-        "asApp": false
-      },
-      "URL": "https://graph.microsoft.com/beta/policies/identitySecurityDefaultsEnforcementPolicy"
-    },
-    {
       "name": "CurrentSecureScore",
       "UseExistingInfo": false,
       "FrontendFields": [
